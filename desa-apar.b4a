@@ -1,0 +1,223 @@
+﻿Build1=Default,b4a.example
+File1=back-arrow.png
+File10=login.bal
+File11=logo.png
+File12=mainscrollview.bal
+File13=maps.png
+File14=mapsev.bal
+File15=mapsrg.bal
+File16=package.bal
+File17=package.png
+File18=pesona_apar.png
+File19=pohon-mangrove.png
+File2=bg-header.jpg
+File20=product.bal
+File21=product.png
+File22=sign-in.png
+File23=sign-out.png
+File24=star.png
+File25=turtle-1.png
+File3=bullhorn.png
+File4=campground-solid.png
+File5=detail.bal
+File6=homevisitor.bal
+File7=itemev.bal
+File8=itemrg.bal
+File9=list.bal
+FileGroup1=Default Group
+FileGroup10=Default Group
+FileGroup11=Default Group
+FileGroup12=Default Group
+FileGroup13=Default Group
+FileGroup14=Default Group
+FileGroup15=Default Group
+FileGroup16=Default Group
+FileGroup17=Default Group
+FileGroup18=Default Group
+FileGroup19=Default Group
+FileGroup2=Default Group
+FileGroup20=Default Group
+FileGroup21=Default Group
+FileGroup22=Default Group
+FileGroup23=Default Group
+FileGroup24=Default Group
+FileGroup25=Default Group
+FileGroup3=Default Group
+FileGroup4=Default Group
+FileGroup5=Default Group
+FileGroup6=Default Group
+FileGroup7=Default Group
+FileGroup8=Default Group
+FileGroup9=Default Group
+Group=Default Group
+Library1=core
+Library10=xui
+Library11=xui views
+Library12=ahpreferenceactivity
+Library2=dateutils
+Library3=gps
+Library4=json
+Library5=okhttputils2
+Library6=runtimepermissions
+Library7=simplemediamanager
+Library8=webviewextras
+Library9=webviewsettings
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="14" android:targetSdkVersion="30"/>~\n~<uses-permission android:name="android.permission.INTERNET"/>~\n~<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />~\n~<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />~\n~<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>~\n~<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION " />~\n~<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />~\n~<uses-feature android:name="android.hardware.location.gps"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~SetApplicationAttribute(android:usesCleartextTraffic,"true")~\n~'End of default text.~\n~AddPermission(android.permission.FOREGROUND_SERVICE)~\n~~\n~~\n~~\n~~\n~
+Module1=Core
+Module10=Starter
+Module11=TourismPackage
+Module12=TourismProduct
+Module2=DetailAt
+Module3=DetailEv
+Module4=Homeuser
+Module5=Homevisitor
+Module6=ListAt
+Module7=ListEv
+Module8=MapsAt
+Module9=MapsEv
+NumberOfFiles=25
+NumberOfLibraries=12
+NumberOfModules=12
+Version=11.8
+@EndOfDesignText@
+#Region  Project Attributes 
+	#ApplicationLabel: Desa Wisata Apar Pariaman
+	#VersionCode: 1
+	#VersionName: 
+	'SupportedOrientations possible values: unspecified, landscape or portrait.
+	#SupportedOrientations: portrait
+	#CanInstallToExternalStorage: False
+#End Region
+
+#Region  Activity Attributes 
+	#FullScreen: False
+	#IncludeTitle: True
+#End Region
+
+Sub Process_Globals
+	'These global variables will be declared once when the application starts.
+	'These variables can be accessed from all modules.
+	Public server As String = "https://apar.batubusuak.com/mobile/"
+	Public baseServer As String = "https://apar.batubusuak.com/"
+	Public data, user As Map
+	Public id,email, username,  name, user_image, address, contact As String
+	Public in_group As Boolean
+	Public manager As AHPreferenceManager
+End Sub
+
+Sub Globals
+	'These global variables will be redeclared each time the activity is created.
+	Private BtnLogin As Button
+	Private BtnVisitor As Button
+	Private EditLogin As EditText
+	Private EditPassword As EditText
+	Private ImageLogin As ImageView
+	Private PanelLogin As Panel
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+	CheckLogin
+	Activity.LoadLayout("Login")
+	StartActivity(Homevisitor)
+End Sub
+
+Sub Activity_Resume
+	Log("Login loaded")
+	Log("Resume: "&manager.GetBoolean("user"))
+End Sub
+
+Sub Activity_Pause (UserClosed As Boolean)
+
+End Sub
+
+
+Private Sub EditPassword_TextChanged (Old As String, New As String)
+	
+End Sub
+
+Private Sub EditLogin_TextChanged (Old As String, New As String)
+	
+End Sub
+
+Private Sub BtnVisitor_Click
+	Log("Redirecting to HomeVisitor Activity")
+	manager.SetBoolean("is_login", False)
+	manager.SetBoolean("visitor", True)
+	manager.SetBoolean("user", False)
+	Activity.Finish
+	StartActivity(Homevisitor)
+End Sub
+
+Private Sub BtnLogin_Click
+	Log(server&"login")
+	Core.ExecuteUrl(server&"login", "login="&EditLogin.Text&"&password="&EditPassword.Text, "Login", Me)
+End Sub
+
+Sub CheckLogin
+	Log("Checking login status...")
+	Dim isLogin As Boolean
+	isLogin = manager.GetBoolean("is_login")
+	If isLogin Then
+		If manager.GetBoolean("user") Then
+			Log("Redirecting to HomeUser activity")
+			Activity.Finish
+			StartActivity(Homeuser)
+		End If
+	End If
+End Sub
+
+Sub JobDone (Job As HttpJob)
+	Log("JobName = " & Job.JobName & ", Success = " & Job.Success)
+	If Job.Success Then
+		Try
+			Dim res As String
+			res = Job.GetString
+			Dim parser As JSONParser
+			parser.Initialize(res)
+			Log("Response from server :"&res)
+			
+			Dim map As Map
+			map = parser.NextObject
+			data = map.Get("data")
+			in_group = data.Get("in_group")
+			If in_group Then
+				user = data.Get("user")
+				id = user.Get("id")
+				email = user.Get("email")
+				username = user.Get("username")
+				name = user.Get("name")
+				user_image = user.Get("user_image")
+				address = user.Get("address")
+				contact = user.Get("contact")
+			
+				ToastMessageShow("Login as User", False)
+				Msgbox2("Hi, "&name, "Logged In","Oke","","",Null)
+				Log("Redirect to HomeUser Activity")
+				
+				manager.SetBoolean("is_login", True)
+				manager.SetBoolean("user", True)
+				manager.SetBoolean("visitor", False)
+				manager.SetString("user_id", id)
+				Activity.Finish
+				StartActivity(Homeuser)
+			Else
+				MsgboxAsync("Please input correct credentials","Login Failed")
+			End If
+		Catch
+			Log(LastException)
+		End Try
+	Else
+		Dim errorParser As JSONParser
+		errorParser.Initialize(Job.ErrorMessage)
+		
+		Dim errorMap As Map
+		errorMap = errorParser.NextObject
+		Log("Error: " & Job.ErrorMessage)
+		
+		Dim error As String
+		error = errorMap.Get("message")
+		ToastMessageShow("Error: " & error, True)
+		MsgboxAsync("Please input correct credentials","Login Failed")
+	End If
+	Job.Release
+End Sub
